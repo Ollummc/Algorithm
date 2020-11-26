@@ -186,7 +186,7 @@ def solve_shift_scheduling(params, output_proto):
     """Solves the shift scheduling problem."""
     # Data
     num_employees = 8
-    num_weeks = 3
+    num_weeks = 5
     shifts = ['O', 'M', 'A', 'N']
 
     # Fixed assignment: (employee, shift, day).

@@ -41,11 +41,12 @@ for data in testdata2:
    # for d in data:
     # print(data[2])    
     # print (anz_tage)
-work ={}
-print ("workdays", workdays)
-for data in testdata:
-    data[2] = np.setdiff1d(range(data[1],data[2]),schoolweeks)
-    #ra = range(testdata)
+
+# work ={}
+# print ("workdays", workdays)
+# for data in testdata:
+#     data[2] = np.setdiff1d(range(data[1],data[2]),schoolweeks)
+#     #ra = range(testdata)
     
     #print( int(num_days/2))
     # for d in data[2]:
