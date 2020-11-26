@@ -12,9 +12,10 @@ soll_SL = 8#(400/8/at)/ --> BSP bis Woche 40 abgeschlossen
 soll_AD = 8 #(400/8/at)--> BSP bis Woche 40 abgeschlossen
 soll_Paed = 2 #(60/8/at) --> BSP bis Woche 40 abgeschlossen
 soll_PSV = 3 #(120/8/at) --> BSP bis Woche 50 abgeschlossen
-num_days =52 #40 #75
+num_days =53 #40 #75
 all_days = range(num_days)
-
+half_num_of_days = num_days //2 + (num_days % 2 >0)
+print(half_num_of_days)
 schoolweeks = [1,2,3,4,5,10,11,12,13,14,15,20,21,23,44,45,46,47]
 workdays = np.setdiff1d(all_days,schoolweeks)
 test = np.setdiff1d(range(0,30),schoolweeks)
@@ -38,8 +39,8 @@ for data in testdata2:
     anz_tage = data[2] - len(schoolweeks)
     data[2] = np.setdiff1d(range(data[1],data[2]),schoolweeks)
    # for d in data:
-    print(data[2])    
-    print (anz_tage)
+    # print(data[2])    
+    # print (anz_tage)
 work ={}
 print ("workdays", workdays)
 for data in testdata:
