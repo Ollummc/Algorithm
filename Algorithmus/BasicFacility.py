@@ -1,12 +1,17 @@
-import FacilityEnum as FacilityEnum
-class BasicFacility(FacilityEnum):
+from FacilityEnum import FacilityEnum
+class BasicFacility():
+    
+    facilityName = "ss"
+    facility_supply_area = ""
     currentlyOccupiedTrainingPositions = 0
     maxAvailableTrainingPositions = 0
     targetHours = 0
     hours_a_day = 0
-    kindOfFacilityList = []
+    #kindOfFacilityList = []
     practicalGuides = []
     regularTrainees = 0
     externTrainees = 0
-    #def __init__(self):
+    print(FacilityEnum.AC)
+        # self.facilityName = p_facilityName
+        # self.maxAvailableTrainingPositions = p_maxAvailableTrainingPositions
         
