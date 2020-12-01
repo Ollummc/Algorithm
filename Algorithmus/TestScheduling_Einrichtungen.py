@@ -1,12 +1,13 @@
 from ortools.sat.python import cp_model
-import numpy as np 
 import Controller
-import PsychiatricCare, Pediatrics, InpatientAcuteCare, InpatientLongTermCare, OutpatientService
-from BasicFacility import BasicFacility 
+import FacilityFactory, UserFactory
+import numpy as np 
+from Facilities.BasicFacility import BasicFacility 
+from FacilityEnum import FacilityEnum as FE, AreaHours as AH
 class NursesPartialSolutionPrinter(cp_model.CpSolverSolutionCallback):
     """Print intermediate solutions."""
 
-    def __init__(self, shifts, num_employees,num_weeks, num_weeks_for_work, num_schooldays, num_areas, sols):
+    def __init__(self, shifts, num_employees, num_weeks_for_work, num_schooldays, num_areas, sols):
         cp_model.CpSolverSolutionCallback.__init__(self)
         self._shifts = shifts
         self._num_employees = num_employees
@@ -42,47 +43,25 @@ class NursesPartialSolutionPrinter(cp_model.CpSolverSolutionCallback):
     #                    if self.Value(self._shifts[(n, d, s)]):
     #                        counter +=1
     #                 print('  Employee %i works in the supply area %i a total of %i weeks' % (n, s,counter))
-        #else:
-            #print ("testooo")
-            #
             
-    def solution_count(self):
-        return self._solution_count
+    # def solution_count(self):
+    #     return self._solution_count
 
 def main():
-    facilitysList = []
-    facilitysList.append(InpatientAcuteCare.InpatientAcuteCare("Einrichtung2", 3))
-    facilitysList.append(OutpatientService.OutpatientService("Einrichtung2", 3))
-    facilitysList.append(InpatientLongTermCare.InpatientLongTermCare("Einrichtung2", 3))
-    facilitysList.append(Pediatrics.Pediatrics("Einrichtung2", 3))
-    facilitysList.append(PsychiatricCare.PsychatricCare("Einrichtung 1", 3))
-    InpatientAcuteCareFacilityList =[]
-    OutpatientServiceFacilityList = []
-    InpatientAcuteCareFacilityList = []
-    PediatricsFacilityList = []
-    PsychiatricCareFacilityList = []
-    for f in facilitysList:
-        print ("Name: {0} Supply_area: {1}, Capazity: {2} TargerHours: {3}" .format (f.facilityName, f.facility_supply_area, f.maxAvailableTrainingPositions, f.targetHours))
-
-    num_employees = 10#5#40
-    num_areas = 5
-    num_weeks = 26#56
+    num_employees =  len(Controller.traineeList)#10#5#40
+    num_areas = 0
     num_Pflichteinsaetzen = 4
     all_employees = range(num_employees)
-    all_areas = range(num_areas)
-    all_days = range(num_weeks)
+    all_days = range(Controller.num_weeks)
     all_Pflichteinsaetze = range( num_Pflichteinsaetzen)
 
     #capazity for the 5 areas
-    maxkap = [15,20,30,30,10]#[1,2,3,3,1]#[20,20,30,30,25]
+    maxkap = []
+    for cap in Controller.maxCapDict.values():
+        maxkap.append(cap)
 
     #time that the Employee needs in the diffenrent facilities
-    hours_acut_care = 6#400h/one_work_day/5
-    hours_longterm_care = 6 #(400/8/5)
-    hours_ambulant_service = 6 #(400/8/5)
-    hours_pediatrics = 2 #(60/8/5) 
-    hours_psychiatric_care = 2 #(120/8/5)
-    sollstd = [hours_acut_care,hours_longterm_care,hours_ambulant_service,hours_pediatrics,hours_psychiatric_care]
+    sollstd = [AH.AC.value,AH.LTC.value,AH.AS.value,AH.PC.value,AH.PSYC.value]
     # Creates the model.
     model = cp_model.CpModel()
     #Decision-Variable 
@@ -92,50 +71,65 @@ def main():
     #         for p in all_Pflichteinsaetze:
     #             pfl[(n, d, p)] = model.NewBoolVar('pfl_n%id%ip%i' % (n, d, p))
 
-    # home_facility = {}
-    # for n in all_employees:
-    #     for e in facilitysList:
-    #         if(n[1] == e):
-    #             home_facility[(n, e)] = model.NewBoolVar('home_facility_n%ie%i' % (n, e))
-    #             model.Add(home_facility[(n,e)] == 1)
-
-    # facility_supply_area= {}
-    # for s in all_areas:
-    #     for e in facilitysList:
-    #         if(e[1] == s):
-    #             facility_supply_area[(s, e)] = model.NewBoolVar('home_facility_s%ie%i' % (s, e))
-    #             model.Add(home_facility[(s,e)] == 1)
-
-
-
-
+ 
+    
     #schoolweeks = [1,2,3,4,5,10,11,12,13,14,15,20,21,23,44,45,46,47]
     schoolweeks = [1]
     #Get the current days a employee can work in one of the 5 areas
     weeks_for_work = np.setdiff1d(all_days,schoolweeks)
-    #If the half number of days isnt integer
-    half_num_of_days = num_weeks /2 + (num_weeks %2 >0)
-    start_end_data = [
-        ["acut_care",0,int(half_num_of_days),int(num_weeks)],
-        ["long-term_care", 0,int(half_num_of_days),int(num_weeks)],
-        ["ambulant_service", 0,int(half_num_of_days),int(num_weeks)],
-        ["pediatrics", 0,int(half_num_of_days),int(num_weeks)],
-        ["psychiatric_care", int(half_num_of_days),int(half_num_of_days),int(num_weeks)]
-    ]
     starts = []
     ends = []
+    for area in FE:
+        num_areas +=1
+
+    all_areas=range(num_areas)
+
+    
     #Get the days a employee can work in a facility
-    for data in start_end_data:
-        if(data[0]== "psychiatric_care"):
-            starts.append(np.setdiff1d(range(data[1],data[3]),schoolweeks))
+    for data in Controller.facilitysList:
+        if(data.facility_supply_area == FE.PSYC.value):
+            starts.append(np.setdiff1d(range(data.startData,data.endData),schoolweeks))
         else:
-            starts.append(np.setdiff1d(range(data[1],data[2]),schoolweeks))
-        ends.append(np.setdiff1d(range(data[2],data[3]),schoolweeks))
+            starts.append(np.setdiff1d(range(data.startData,data.midData),schoolweeks))
+        ends.append(np.setdiff1d(range(data.midData,data.endData),schoolweeks))
+
+#Should be 1 if Trainee got his Home-Facility in Facility E
+    home_facility = {}
+    for n, trainee in enumerate(Controller.traineeList):
+        for e, fac in enumerate(Controller.facilitysList):
+            if(trainee.homeFacilityName == fac.facilityName):
+               
+                home_facility[(n, e)] = model.NewBoolVar('home_facility_n%ie%i' % (n, e))
+                print ( home_facility[(n, e)])
+                model.Add(home_facility[(n,e)] == 1)
+
+##DECISION-VARIBALE
+#Should be 1 if Facility e got supply_area s
+    facility_supply_area_dict= {}
+    all_facilities= [FE.AC.value,FE.LTC.value,FE.AS.value,FE.PC.value,FE.PSYC.value]
+    for s in all_areas:
+            for e, fac in enumerate(Controller.facilitysList):
+                if(fac.facility_supply_area == all_facilities[s]):
+                    facility_supply_area_dict[(s, e)] = model.NewBoolVar('Schwerpunkt_s%ie%i' % (s, e))
+                    print(facility_supply_area_dict[(s,e)])
+                    model.Add(facility_supply_area_dict[(s,e)] == 1)
+    
+    # for s in all_areas:
+    #     print("sortedList: ", len(Controller.sorted_facilityList))
+    #     for lists in Controller.sorted_facilityList:
+    #         listlenght = len(lists)
+    #         for e in range(len(lists)):
+    #             if(lists[e].facility_supply_area == all_facilities[e]):
+    #                 facility_supply_area_dict[(s, e)] = model.NewBoolVar('Schwerpunkt_s%ie%i' % (s, e))
+    #                 print(facility_supply_area_dict[(s,e)])
+    #                 model.Add(facility_supply_area_dict[(s,e)] == 1)
+    
+
     #Decision-Variable. Should be 1 if employee n works on week d in area s
     shifts = {}
     for n in all_employees:
         for d in weeks_for_work:
-            for s in all_areas:
+            for s in all_areas :
                 shifts[(n, d, s)] = model.NewBoolVar('shift_n%id%is%i' % (n, d, s))
 
     # (3) Each employee can only work in one shift s on one day d
@@ -146,22 +140,23 @@ def main():
             model.Add(sum(shifts[(n, d, s)] for s in all_areas) <= 1)
     # #(1)In a shift s / in the care area v, all nurses n have to be over the period d    
     for s in all_areas: 
-        print("Versorgungsbereich: ", s)
+        #print("Versorgungsbereich: ", s)
         for n in all_employees:
-            print("Azubi: ",n)
-            if(start_end_data[s][0]== "psychiatric_care"):
-                 model.Add(sum(shifts[(n, g, s)] for g in starts[s] ) == (int(sollstd[s])))
-                 print("start:", starts[s])
+            if(Controller.facilitysList[s].facility_supply_area == FE.PSYC.value):
+                    model.Add(sum(shifts[(n, g, s)] for g in starts[s] ) == (int(sollstd[s])))
             else:
                 model.Add(sum(shifts[(n, g, s)] for g in starts[s] ) >= (int(sollstd[s]/2)))
                 model.Add(sum(shifts[(n, g, s)] for g in ends[s] ) >= (int(sollstd[s]/2)))
-                print("start in else:", starts[s])
-                print("ends in else:", ends[s])
-                print("Soll-Stunden:", int(sollstd[s]/2))
+
     # (2) A supply area v / shift s has a maximum capacity
     for d in weeks_for_work:
         for s in all_areas:
             model.Add(sum(shifts[(n, d, s)] for n in all_employees) <= maxkap[s])
+
+    # for d in weeks_for_work:
+    #     for e in facilitysList:
+    #         model.Add(sum(shifts[(n, d, s)] for n in all_employees) <= maxkap[s])
+
 
 
 
@@ -204,7 +199,7 @@ def main():
     solver.parameters.linearization_level = 0
     # Display the first five solutions.
     a_few_solutions = range(2)
-    solution_printer = NursesPartialSolutionPrinter(shifts, num_employees,num_weeks,
+    solution_printer = NursesPartialSolutionPrinter(shifts, num_employees,
                                                    weeks_for_work, schoolweeks, num_areas,
                                                    a_few_solutions)
     status = solver.SearchForAllSolutions(model, solution_printer)
@@ -221,4 +216,6 @@ def main():
 
 
 if __name__ == '__main__':
+    FacilityFactory.CreateFacilities()
+    UserFactory.CreateUser()
     main()

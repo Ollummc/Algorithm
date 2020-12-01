@@ -11,6 +11,10 @@ class BasicFacility():
     practicalGuides = []
     regularTrainees = 0
     externTrainees = 0
+    #start und Ende 
+    startData = 0
+    endData = 0
+    midData = 0
     print(FacilityEnum.AC)
         # self.facilityName = p_facilityName
         # self.maxAvailableTrainingPositions = p_maxAvailableTrainingPositions
