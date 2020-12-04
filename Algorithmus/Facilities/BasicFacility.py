@@ -15,6 +15,8 @@ class BasicFacility():
     startData = 0
     endData = 0
     midData = 0
+    facilityID = 0
+    number_supply_area=0
     print(FacilityEnum.AC)
         # self.facilityName = p_facilityName
         # self.maxAvailableTrainingPositions = p_maxAvailableTrainingPositions

@@ -11,6 +11,7 @@ class PsychatricCare(BasicFacility):
           self.endData = Controller.num_weeks
           self.startData = Controller.half_num_of_days
           self.midData = Controller.half_num_of_days
+          self.order_in_list = 0
      def derold(self):
          print("Ausgabe",self.facility_supply_area, "+", self.targetHours)
      
