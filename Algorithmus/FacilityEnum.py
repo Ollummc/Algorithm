@@ -7,11 +7,11 @@ class FacilityEnum (Enum):
     PSYC = "Psychiatric_Care"
 
 class AreaHours (Enum):
-    AC = 6#400
-    LTC = 6#400
-    AS = 6#400
-    PC = 2#120
-    PSYC = 2#120
+    AC = 2#6#400
+    LTC = 2#6#400
+    AS = 2#6#400
+    PC = 2#2#120
+    PSYC =2 #2#120
 class InternalAssignments (Enum):
     ORI = "Orientation-Phase"
     ELE1 = "Elective 1"

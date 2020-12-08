@@ -4,13 +4,13 @@ from Facilities import PsychiatricCare, Pediatrics, InpatientAcuteCare, Inpatien
 
 def CreateFacilities():
     #Einrichtungsname, Verfügbare Kapazität
-    Controller.facilitysList.append(InpatientAcuteCare.InpatientAcuteCare("Einrichtung1",15))
-    Controller.facilitysList.append(AmbuCare.AmbulantCare("Einrichtung2", 20))
-    Controller.facilitysList.append(InpatientLongTermCare.InpatientLongTermCare("Einrichtung3", 16))
-    Controller.facilitysList.append(Pediatrics.Pediatrics("Einrichtung4", 20))
-    Controller.facilitysList.append(PsychiatricCare.PsychatricCare("Einrichtung5", 10))
-    Controller.facilitysList.append(PsychiatricCare.PsychatricCare("Einrichtung6", 10))
-    Controller.facilitysList.append(PsychiatricCare.PsychatricCare("Einrichtung7", 20))
+    Controller.facilitysList.append(InpatientAcuteCare.InpatientAcuteCare("Einrichtung1",5))
+    Controller.facilitysList.append(AmbuCare.AmbulantCare("Einrichtung2", 3))
+    Controller.facilitysList.append(InpatientLongTermCare.InpatientLongTermCare("Einrichtung3", 3))
+    Controller.facilitysList.append(Pediatrics.Pediatrics("Einrichtung4", 3))
+    Controller.facilitysList.append(PsychiatricCare.PsychatricCare("Einrichtung5", 2))
+    Controller.facilitysList.append(PsychiatricCare.PsychatricCare("Einrichtung6",2))
+    Controller.facilitysList.append(PsychiatricCare.PsychatricCare("Einrichtung7", 5))
     for f in Controller.facilitysList:
         print ("Name: {0} Supply_area: {1}, Capazity: {2} TargerHours: {3}" .format (f.facilityName, f.facility_supply_area, f.maxAvailableTrainingPositions, f.targetHours))
     #CreateFacilities()

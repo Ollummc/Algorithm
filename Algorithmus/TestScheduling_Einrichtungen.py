@@ -6,7 +6,7 @@ from Facilities.BasicFacility import BasicFacility
 from FacilityEnum import FacilityEnum as FE, AreaHours as AH, InternalAssignments as IA
 class NursesPartialSolutionPrinter(cp_model.CpSolverSolutionCallback):
     """Print intermediate solutions."""
-
+   
     def __init__(self, shifts, num_employees, num_weeks_for_work, num_schooldays, num_areas, sols, p_pflicht, p_facility_supply_area_dict, p_homeFacility, p_allPflichteinsaetze):
         cp_model.CpSolverSolutionCallback.__init__(self)
         self._shifts = shifts
@@ -20,14 +20,17 @@ class NursesPartialSolutionPrinter(cp_model.CpSolverSolutionCallback):
         self._solution_count = 0
         self._facility_supply_area_dict = p_facility_supply_area_dict
         self._homeFacility = p_homeFacility
+      
         
     def on_solution_callback(self):
-        
+        testooarr = []
+        not_working_counter= 0
         if self._solution_count <= self._solutions:
             print('Solution %i' % self._solution_count)
-            for d in (self._num_weeks_for_work):
+            for d in self._num_weeks_for_work:
                 print('Woche %i' % d)
                 for n in self._homeFacility:
+                    not_working_counter= 0
                 #for n in range(self._num_employees):
                     is_working = False
                     #for s in range(self._num_areas):
@@ -35,30 +38,38 @@ class NursesPartialSolutionPrinter(cp_model.CpSolverSolutionCallback):
                         if self.Value(self._shifts[(n[0], d, s[1], s[0])]):# or self.Value(self._pflicht[(n[0], d, s[1], s[0])]):
                                 is_working = True
                                 print('  Employee %i works in Facility %i with supply area %i. His HomeFacility is %i ' % (n[0], s[1], s[0], n[1]))
-                        # if self.Value(self._pflicht[(n[0], d, s[1], p)]):
-                        #      is_working = True
-                        #     print('  Employee %i works in the Plfichteinsatz  %i' % (n[0]))          
+                        for p in range(4):
+                            if self.Value(self._pflicht[(n[0], d, s[1], p)]):
+                                is_working = True
+                                print('  Employee %i works in Facility %i in the Plfichteinsatz %i am Tag %i.His HomeFacility is %i' % (n[0], s[1],p,d,n[1]))  
                     if not is_working:
                         print('  Employee {} does not work'.format(n))
+                        not_working_counter +=1
             self._solution_count += 1
         
             print()
             for n in range (self._num_employees):
+                print('Employee %i' %(n))
                 counter = 0
-                for e in self._facility_supply_area_dict:
+                for e in Controller.facilitysList:
                     counter = 0
+                    counterpflicht = 0
                     for d in (self._num_weeks_for_work):
-                       if self.Value(self._shifts[(n, d,e[1], e[0])]):
-                           counter +=1
-                    print('  Employee %i works in Facility %i with the supply area %i a total of %i weeks' % (n, e[1], e[0], counter))
-            
+                        if (self.Value(self._shifts[(n, d,e.facilityID, e.number_supply_area)])):
+                                counter +=1
+                        for p in range(4):
+                            if(self.Value(self._pflicht[(n, d,e.facilityID, p)])):
+                                counterpflicht +=1
+                    print(' works in Facility %i with the supply area %i a total of %i weeks (%i in Supply, %i in Pflicht)' % (e.facilityID, e.number_supply_area, counter + counterpflicht, counter,counterpflicht))
+            for element in testooarr:
+                print(testooarr)
     def solution_count(self):
         return self._solution_count
 
 def main():
     num_employees =  len(Controller.traineeList)#10#5#40
     num_areas = len(FE)
-    print("numareas: ",num_areas)
+    print("numareas: ",num_areas) 
     num_Pflichteinsaetzen = len(IA)
     all_employees = range(num_employees)
     all_days = range(Controller.num_weeks)
@@ -72,10 +83,10 @@ def main():
 
     #time that the Employee needs in the diffenrent facilities
     sollstd = [AH.AC.value,AH.LTC.value,AH.AS.value,AH.PC.value,AH.PSYC.value]
-    sollstd_stamm = [1,2,2,1]#[8,2,2,10]
+    sollstd_stamm = [4,2,2,2]#[5,5,2,1]#[8,2,2,10]
     # Creates the model.
     model = cp_model.CpModel()
-    schoolweeks = [1,2,3,4,5,10,11,12,13,14,15,20,21,23,44,45,46,47]
+    schoolweeks = [1,2,3,4,5,10,11,12,13,14,15,20,21,23,44,45,46,47] # 18 Stück 56 - 18 = 38 Tage zur Planung 14 std. Stamm und 12 std in soll
     #schoolweeks = [1]
     #Get the current days a employee can work in one of the 5 areas
     weeks_for_work = np.setdiff1d(all_days,schoolweeks)
@@ -144,31 +155,48 @@ def main():
             for item in Controller.facilitysList:
                 for p in all_Pflichteinsaetze:
                     pfl[(n, d, item.facilityID,  p)] = model.NewBoolVar('pfl_n%id%ie%ip%i' % (n, d, item.facilityID, p))
-
-
+    #(1) Each employee n can only work d in one supply_area s on one day d
+    # for n in all_employees:
+    #     for d in weeks_for_work:
+    #         for e in Controller.facilitysList:
+    #             for p in all_Pflichteinsaetze:
+    #                # model.Add(sum((shifts[(n, d, item.facilityID,item.number_supply_area)]) for item in Controller.facilitysList) == 1).OnlyEnforceIf(pfl[(n, d, e.facilityID,  p)].Not())
+    #                 model.Add(sum((shifts[(n, d, item.facilityID,item.number_supply_area)]) for item in Controller.facilitysList) <= 1).OnlyEnforceIf(pfl[(n, d, e.facilityID,  p)].Not())
     # for n in all_employees:
     #     for d in weeks_for_work:
     #         for item in Controller.facilitysList:
-    #             for p in all_Pflichteinsaetze: 
-    #                 model.Add((shifts[(n,d,item.facilityID, item.number_supply_area)]+ pfl[(n,d,item.facilityID,p)])<=1)
+    #                 model.Add(sum((shifts[(n, d, item.facilityID,item.number_supply_area)]) for p in all_Pflichteinsaetze) <= 1)#.OnlyEnforceIf(pfl[(n, d, e.facilityID,  p)].Not())
+  
+    # for n in all_employees:
+    #     for d in weeks_for_work:
+    #         for item in Controller.facilitysList:
+    #             model.Add(sum((pfl[(n, d, item.facilityID,  p)]) for p in all_Pflichteinsaetze) <= 1).OnlyEnforceIf((shifts[(n, d, item.facilityID,item.number_supply_area)]).Not())
+    # for n in all_employees:
+    #     for d in weeks_for_work:
+    #         for p in all_Pflichteinsaetze:
+    #             model.Add(sum(pfl[(n, d, item.facilityID,  p)] for item in Controller.facilitysList) <= 1)#.OnlyEnforceIf((shifts[(n, d, item.facilityID,item.number_supply_area)]).Not())
 
-    # (1) Each employee can only work in one supply_area s on one day d
+
+
     for n in all_employees:
         for d in weeks_for_work:
-            #for p in all_Pflichteinsaetze:
-            # model.Add(sum(shifts[(n, d, s[1],s[0])] for s in all_areas) <= 1)
-                #model.Add(sum((shifts[(n, d, item.facilityID,item.number_supply_area)] + pfl[(n, d, item.facilityID, p)]) for item in Controller.facilitysList) <= 1)
-            model.Add(sum(shifts[(n, d, item.facilityID,item.number_supply_area)] for item in Controller.facilitysList) <= 1)
-    
+            brra= []
+            for e in Controller.facilitysList:
+                brra.append(shifts[(n,d,e.facilityID, e.number_supply_area)])
+                for p in all_Pflichteinsaetze:                   
+                    brra.append(pfl[(n,d,e.facilityID, p)])
+            model.Add(sum(bre for bre in brra) <=1)
+            #print(sum(bre for bre in brra) <=1)
 
-#(2)
-    # for item in Controller.facilitysList:
-    #     for n, stamm in enumerate(home_facility):
-    #         for p in all_Pflichteinsaetze:
-    #             #Einteilung der Azubis in Stammeinrichtung
-    #             if(stamm[1] == item.facilityID):
-    #                 model.Add(sum(pfl[(n, g, item.facilityID, p)] for g in startsIA[p] ) >= (int(sollstd_stamm[p])))#.OnlyEnforceIf(home_facility[(stamm[0],stamm[1])])
 
+# #(2)
+
+    for item in Controller.facilitysList:
+        for n, stamm in enumerate(home_facility):
+            for p in all_Pflichteinsaetze:
+                #Einteilung der Azubis in Stammeinrichtung
+                if(stamm[1] == item.facilityID):
+                    model.Add(sum(pfl[(n, g, item.facilityID, p)] for g in startsIA[p] ) >= (int(sollstd_stamm[p])))
     # #(2)In a shift s / in the care area v, all nurses n have to be over the period d   
     #Employee should work the supply area from the home_facility in their home facility
     for item in Controller.facilitysList:
@@ -204,10 +232,10 @@ def main():
                 elif(d < latest_Workday):
                     model.Add((shifts [n, weeks_for_work[i-1], item.facilityID, item.number_supply_area] + shifts[(n, weeks_for_work[i], item.facilityID, item.number_supply_area)]+ shifts [n, weeks_for_work[i+1],  item.facilityID, item.number_supply_area]) >=2).OnlyEnforceIf(shifts[(n,d,item.facilityID,item.number_supply_area)])
                     model.Add((shifts [n, weeks_for_work[i-1], item.facilityID, item.number_supply_area] + shifts[(n, weeks_for_work[i], item.facilityID, item.number_supply_area)]+ shifts [n, weeks_for_work[i+1],  item.facilityID, item.number_supply_area]) <=6).OnlyEnforceIf(shifts[(n,d,item.facilityID,item.number_supply_area)])
-    # # Creates the solver and solve.
+# # #     # # Creates the solver and solve.
     solver = cp_model.CpSolver()
-    #Multithreading
-    
+#     #Multithreading
+
     #solver.parameters.num_search_of_workers= 3
     solver.parameters.linearization_level = 0
 
