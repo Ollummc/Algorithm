@@ -10,3 +10,4 @@ class InpatientAcuteCare(BasicFacility):
           self.startData = 0
           self.endData = Controller.num_weeks 
           self.midData = Controller.half_num_of_days
+          #self.number_supply_area = 0

@@ -5,9 +5,10 @@ from Facilities import PsychiatricCare, Pediatrics, InpatientAcuteCare, Inpatien
 def CreateFacilities():
     #Einrichtungsname, Verfügbare Kapazität
     Controller.facilitysList.append(InpatientAcuteCare.InpatientAcuteCare("Einrichtung1",5))
-    Controller.facilitysList.append(AmbuCare.AmbulantCare("Einrichtung2", 3))
-    Controller.facilitysList.append(InpatientLongTermCare.InpatientLongTermCare("Einrichtung3", 3))
+    Controller.facilitysList.append(AmbuCare.AmbulantCare("Einrichtung2", 5))
+    Controller.facilitysList.append(InpatientLongTermCare.InpatientLongTermCare("Einrichtung3", 5))
     Controller.facilitysList.append(Pediatrics.Pediatrics("Einrichtung4", 3))
+    Controller.facilitysList.append(Pediatrics.Pediatrics("Einrichtung8", 2))
     Controller.facilitysList.append(PsychiatricCare.PsychatricCare("Einrichtung5", 2))
     Controller.facilitysList.append(PsychiatricCare.PsychatricCare("Einrichtung6",2))
     Controller.facilitysList.append(PsychiatricCare.PsychatricCare("Einrichtung7", 5))
