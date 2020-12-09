@@ -6,3 +6,4 @@ class Trainee (User):
     EndOfTraining = "Date"
     def __init__(self, p_name, p_firstname, p_homefacilityName):
         User.__init__(self, p_name,p_firstname, p_homefacilityName)
+        #self.homeFacility = object
