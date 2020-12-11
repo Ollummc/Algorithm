@@ -22,13 +22,21 @@ def CreateUser():
     for i in range (2):
         Trainee1 = Trainee("Azubi" + str(i), "Vorname", "Einrichtung6")
         Controller.traineeList.append(Trainee1)
-    for i in range (2):
+    for i in range (5):
         Trainee1 = Trainee("Azubi" + str(i), "Vorname", "Einrichtung7")
         Controller.traineeList.append(Trainee1)
     for i in range (1):
         Trainee1 = Trainee("Azubi" + str(i), "Vorname", "Einrichtung8")
         Controller.traineeList.append(Trainee1)
-    
+    # for i in range (1):
+    #     Trainee1 = Trainee("Azubi" + str(i), "Vorname", "Einrichtung9")
+    #     Controller.traineeList.append(Trainee1)
+    # for i in range (1):
+    #     Trainee1 = Trainee("Azubi" + str(i), "Vorname", "Einrichtung10")
+    #     Controller.traineeList.append(Trainee1)
+    # for i in range (1):
+    #     Trainee1 = Trainee("Azubi" + str(i), "Vorname", "Einrichtung11")
+    #     Controller.traineeList.append(Trainee1)
     
 
     

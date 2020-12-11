@@ -12,6 +12,9 @@ def CreateFacilities():
     Controller.facilitysList.append(PsychiatricCare.PsychatricCare("Einrichtung5", 2))
     Controller.facilitysList.append(PsychiatricCare.PsychatricCare("Einrichtung6",2))
     Controller.facilitysList.append(PsychiatricCare.PsychatricCare("Einrichtung7", 5))
+    # Controller.facilitysList.append(InpatientAcuteCare.InpatientAcuteCare("Einrichtung10",5))
+    # Controller.facilitysList.append(AmbuCare.AmbulantCare("Einrichtung9", 5))
+    # Controller.facilitysList.append(InpatientLongTermCare.InpatientLongTermCare("Einrichtung11", 5))
     for f in Controller.facilitysList:
         print ("Name: {0} Supply_area: {1}, Capazity: {2} TargerHours: {3}" .format (f.facilityName, f.facility_supply_area, f.maxAvailableTrainingPositions, f.targetHours))
     #CreateFacilities()
