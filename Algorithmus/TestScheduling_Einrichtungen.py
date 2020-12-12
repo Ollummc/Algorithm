@@ -64,6 +64,8 @@ class NursesPartialSolutionPrinter(cp_model.CpSolverSolutionCallback):
                     print(' works in Facility %i with the supply area %i a total of %i weeks (%i in Supply, %i in Pflicht)' % (e.facilityID, e.number_supply_area, counter + counterpflicht, counter,counterpflicht))
             for element in testooarr:
                 print(testooarr)
+        else:
+            return
     def solution_count(self):
         return self._solution_count
 
@@ -216,17 +218,64 @@ def main():
 
     # for n, trainee in enumerate(Controller.traineeList):
     #     print("trainee {} in HomeFacility {}".format(trainee.TraineeID, trainee.homeFacilityName))
-    # for d in weeks_for_work:
-    #     abogullo= []
-    #     old_randi = 0
-    #     for lists in Controller.sorted_facilityList:
-    #         randi = randint(0, len(lists)-1)
-    #         e= lists[randi]
-    #         # if(e.currentlyOccupiedTrainingPositions < e.maxAvailableTrainingPositions):
-    #         #     e.currentlyOccupiedTrainingPositions +=1
-    #         abogullo.append(shifts[(n,d,e.facilityID, e.number_supply_area)])
-    #     #model.Add(sum(abo for abo in abogullo) <=1)
-    #     print(sum(abo for abo in abogullo) ==1)
+    #     for d in weeks_for_work:
+    #         for i in range(longestList):
+    #             hotaf= []
+    #             for liste in Controller.sorted_facilityList:
+    #                 # for e in liste:
+    #                 #     if(trainee.homeFacilityName == e.facilityName):
+    #                 #         testomesto.append(shifts[(n,d,e.facilityID, e.number_supply_area)])
+    #                 #         break
+    #                 #     elif(trainee.homeFacility.facility_supply_area != e.facility_supply_area):
+    #                 #         testomesto.append(shifts[(n,d,e.facilityID, e.number_supply_area)])
+    #                 if len(liste) == 1:
+    #                     hotaf.append(shifts[(n,d,liste[0].facilityID, liste[0].number_supply_area)])
+    #                 if len(liste) == longestList:
+    #                     hotaf.append(shifts[(n,d,liste[i].facilityID, liste[i].number_supply_area)])
+    #                 elif len(liste) > i and len(liste) !=1:
+    #                     test= len(liste)-1
+    #                     hotaf.append(shifts[(n,d,liste[test].facilityID, liste[test].number_supply_area)])
+
+    #             print(sum(t for t in hotaf) ==1)
+    #             #model.Add(sum(t for t in hotaf) ==1)
+
+
+
+
+
+
+
+            #         for bebe in hotaf:
+            #             #print("laenge", len(hotaf))
+            #             if(bebe.facility_supply_area != e.facility_supply_area or bebe.facilityName == e.facilityName):
+            #                 counter +=1
+            #             if (counter == (len(hotaf))):
+            #                 te.append(shifts[(n,d,e.facilityID, e.number_supply_area)])
+            #             # else:
+            #             #     print("Versorgungsbereich von {} existiert in Liste schon:".format(bebe.facilityName))
+            # model.Add(sum(t for t in te)<=1)
+            # print(sum(t for t in te)<=1)
+            
+
+
+
+
+                #if (trainee.homeFacility.facility_supply_area == item.facility_supply_area  ):
+        # for lists in Controller.sorted_facilityList:
+    #(shift_n15d55e0v0) + shift_n15d55e1v2) + shift_n15d55e2v1) + shift_n15d55e3v3) + shift_n15d55e4v3) +
+    #  shift_n15d55e5v4) + shift_n15d55e6v4) + shift_n15d55e7v4) 
+        #     for e in lists:
+        #         beste = []
+                #randi = randint(0, len(lists)-1)
+                #print ("e: ",e)
+                #hotaf.append(shifts[(n,d,e.facilityID, e.number_supply_area)])
+            #te.append(hotaf)
+            #randi = randint(0, len(lists)-1)
+            #e= lists[randi]
+        #abogullo.append(shifts[(n,d,e.facilityID, e.number_supply_area)])
+        #model.Add(sum(abo for abo in abogullo) <=1)
+        #print(sum(abo for abo in abogullo) ==1)
+        #print(sum( h for h in hotaf) ==1)
 # # #(2)Verteilt die definierten Soll-Stunden der Azbis n an Tag d nur, wenn Die aktuelle Einrichtung identisch mti der im Einrichtungsobjekt ist
     puffer =0
     for n, trainee in enumerate(Controller.traineeList):
@@ -281,7 +330,7 @@ def main():
             #for p in all_Pflichteinsaetze:
                 #model.Add((sum(t for t in test) + sum(g for g in rest))==1)
             model.Add((sum(shifts[(n, d, item.facilityID, item.number_supply_area)] for n in all_employees) + sum(pfl[(n, d, item.facilityID, p)] for n in all_employees for p in all_Pflichteinsaetze)) <= item.maxAvailableTrainingPositions)
-            print((sum(shifts[(n, d, item.facilityID, item.number_supply_area)] for n in all_employees) + sum(pfl[(n, d, item.facilityID, p)] for n in all_employees for p in all_Pflichteinsaetze)) <= item.maxAvailableTrainingPositions)
+            #print((sum(shifts[(n, d, item.facilityID, item.number_supply_area)] for n in all_employees) + sum(pfl[(n, d, item.facilityID, p)] for n in all_employees for p in all_Pflichteinsaetze)) <= item.maxAvailableTrainingPositions)
     # for d in weeks_for_work:
     #         for item in Controller.facilitysList:
     #             for p in all_Pflichteinsaetze:
@@ -297,10 +346,10 @@ def main():
             for i,d in enumerate(weeks_for_work):
                 if(d== first_value and weeks_for_work[i] < latest_Workday):
                     model.Add((shifts [n, weeks_for_work[i+2], item.facilityID, item.number_supply_area] + shifts[(n, weeks_for_work[i], item.facilityID, item.number_supply_area)] + shifts [n, weeks_for_work[i+1], item.facilityID, item.number_supply_area]) >=2).OnlyEnforceIf(shifts[(n,d,item.facilityID,item.number_supply_area)])
-                    model.Add((shifts [n, weeks_for_work[i+2], item.facilityID, item.number_supply_area] + (shifts[(n, weeks_for_work[i], item.facilityID, item.number_supply_area)] + shifts [n, weeks_for_work[i+1], item.facilityID, item.number_supply_area])) <=6).OnlyEnforceIf(shifts[(n,d,item.facilityID,item.number_supply_area)])
+                    #model.Add((shifts [n, weeks_for_work[i+2], item.facilityID, item.number_supply_area] + (shifts[(n, weeks_for_work[i], item.facilityID, item.number_supply_area)] + shifts [n, weeks_for_work[i+1], item.facilityID, item.number_supply_area])) <=6).OnlyEnforceIf(shifts[(n,d,item.facilityID,item.number_supply_area)])
                 elif(d < latest_Workday):
                     model.Add((shifts [n, weeks_for_work[i-1], item.facilityID, item.number_supply_area] + shifts[(n, weeks_for_work[i], item.facilityID, item.number_supply_area)]+ shifts [n, weeks_for_work[i+1],  item.facilityID, item.number_supply_area]) >=2).OnlyEnforceIf(shifts[(n,d,item.facilityID,item.number_supply_area)])
-                    model.Add((shifts [n, weeks_for_work[i-1], item.facilityID, item.number_supply_area] + shifts[(n, weeks_for_work[i], item.facilityID, item.number_supply_area)]+ shifts [n, weeks_for_work[i+1],  item.facilityID, item.number_supply_area]) <=6).OnlyEnforceIf(shifts[(n,d,item.facilityID,item.number_supply_area)])
+                    #model.Add((shifts [n, weeks_for_work[i-1], item.facilityID, item.number_supply_area] + shifts[(n, weeks_for_work[i], item.facilityID, item.number_supply_area)]+ shifts [n, weeks_for_work[i+1],  item.facilityID, item.number_supply_area]) <=6).OnlyEnforceIf(shifts[(n,d,item.facilityID,item.number_supply_area)])
 # # #     # # Creates the solver and solve.
     solver = cp_model.CpSolver()
 #     #Multithreading

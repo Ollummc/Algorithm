@@ -11,7 +11,7 @@ class AreaHours (Enum):
     LTC = 2#6#400
     AS = 2#6#400
     PC = 2#2#120
-    PSYC =2 #2#120
+    PSYC =4 #2#120
 class InternalAssignments (Enum):
     ORI = "Orientation-Phase"
     ELE1 = "Elective 1"
