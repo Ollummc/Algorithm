@@ -84,7 +84,7 @@ def main():
 
     #time that the Employee needs in the diffenrent facilities
     sollstd = [AH.AC.value,AH.LTC.value,AH.AS.value,AH.PC.value,AH.PSYC.value]
-    sollstd_stamm = [2,2,2,1]#[5,5,2,1]#[8,2,2,10]
+    sollstd_stamm = [2,2,2,2]#[5,5,2,1]#[8,2,2,10]
     # Creates the model.
     model = cp_model.CpModel()
     schoolweeks = [1,2,3,4,5,10,11,12,13,14,15,20,21,23,44,45,46,47] # 18 Stück 56 - 18 = 38 Tage zur Planung 14 std. Stamm und 12 std in soll
@@ -155,27 +155,64 @@ def main():
             for item in Controller.facilitysList:
                 for p in all_Pflichteinsaetze:
                     pfl[(n, d, item.facilityID,  p)] = model.NewBoolVar('pfl_n%id%ie%ip%i' % (n, d, item.facilityID, p))
-    #(1) Each employee n can only work d in one supply_area s on one day d
+
+
     # for n in all_employees:
     #     for d in weeks_for_work:
-    #                # model.Add(sum((shifts[(n, d, item.facilityID,item.number_supply_area)]) for item in Controller.facilitysList) == 1)
-    #             model.Add(sum((shifts[(n, d, item.facilityID,item.number_supply_area)]) for item in lists) <= 1)#.OnlyEnforceIf(pfl[(n, d, e.facilityID,  p)].Not())
+    #         for liste in Controller.sorted_facilityList:
+    #             model.Add(sum((shifts[(n, d, item.facilityID, item.number_supply_area)]) for item in liste) <= 1)
+    #             print(sum((shifts[(n, d, item.facilityID, item.number_supply_area)]) for item in liste) <= 1)
+    # for n in all_employees:
+    #     for d in weeks_for_work:
+    #             model.Add(sum((shifts[(n, d, item.facilityID, item.number_supply_area)]) for item in Controller.facilitysList) <= 1)
+    #             print(sum((shifts[(n, d, item.facilityID, item.number_supply_area)]) for item in Controller.facilitysList) <= 1)
     for n, trainee in enumerate(Controller.traineeList):
-        #print("trainee {} in HomeFacility {}".format(trainee.TraineeID, trainee.homeFacilityName))
         for d in weeks_for_work:
-            testomesto= []
-            for lists in Controller.sorted_facilityList:
-                for e in lists:
-                    if(trainee.homeFacilityName == e.facilityName):
-                        testomesto.append(shifts[(n,d,e.facilityID, e.number_supply_area)])
-                        for p in all_Pflichteinsaetze:            
-                            #if(trainee.homeFacilityName == e.facilityName):     
-                            testomesto.append(pfl[(n,d,e.facilityID, p)])
-                        break
-                    elif(trainee.homeFacility.facility_supply_area != e.facility_supply_area):
-                        testomesto.append(shifts[(n,d,e.facilityID, e.number_supply_area)])
-            model.Add(sum(t for t in testomesto) ==1)
-
+            test = []
+            rest= []
+            for e in Controller.facilitysList:
+                if(trainee.homeFacilityName == e.facilityName):
+                    rest.append(shifts[(n, d, e.facilityID,e.number_supply_area)])
+                    for p in all_Pflichteinsaetze:            
+                        #if(trainee.homeFacilityName == e.facilityName):     
+                        test.append(pfl[(n,d,e.facilityID, p)])
+                elif(trainee.homeFacility.facility_supply_area != e.facility_supply_area):
+                    rest.append(shifts[(n,d,e.facilityID, e.number_supply_area)])
+                #rest.append(shifts[(n, d, e.facilityID,e.number_supply_area)])
+                #model.AddBoolXOr([test, rest])
+            model.Add((sum(t for t in test) + sum(g for g in rest))==1)
+            #print((sum(t for t in test) + sum(g for g in rest))==1)
+           
+   
+    # for d in weeks_for_work:
+    #     b =[]
+    #     for n, trainee in enumerate(Controller.traineeList):
+    #         testomesto= []
+    #         for lists in Controller.sorted_facilityList:
+    #             for e in lists:
+    #                 if(trainee.homeFacilityName == e.facilityName):
+    #                     testomesto.append(shifts[(n,d,e.facilityID, e.number_supply_area)])
+    #                     break
+    #                 elif(trainee.homeFacility.facility_supply_area != e.facility_supply_area):
+    #                     testomesto.append(shifts[(n,d,e.facilityID, e.number_supply_area)])
+        
+    #         model.Add(sum(t for t in testomesto) <=1)
+    #         print(sum(t for t in testomesto) <=1)
+                
+    # for n, trainee in enumerate(Controller.traineeList):
+    #     #print("trainee {} in HomeFacility {}".format(trainee.TraineeID, trainee.homeFacilityName))
+    #     for d in weeks_for_work:
+    #         testomesto= []
+    #         for lists in Controller.sorted_facilityList:
+    #             for e in lists:
+    #                 if(trainee.homeFacilityName == e.facilityName):
+    #                     for p in all_Pflichteinsaetze:            
+    #                         #if(trainee.homeFacilityName == e.facilityName):     
+    #                         testomesto.append(pfl[(n,d,e.facilityID, p)])
+    #                     break
+                      
+    #         model.Add(sum(t for t in testomesto) <=1)
+    #         print(sum(t for t in testomesto) <=1)
 
     # for n, trainee in enumerate(Controller.traineeList):
     #     print("trainee {} in HomeFacility {}".format(trainee.TraineeID, trainee.homeFacilityName))
@@ -192,35 +229,63 @@ def main():
     #     print(sum(abo for abo in abogullo) ==1)
 # # #(2)Verteilt die definierten Soll-Stunden der Azbis n an Tag d nur, wenn Die aktuelle Einrichtung identisch mti der im Einrichtungsobjekt ist
     puffer =0
-    for item in Controller.facilitysList:
-        for n, stamm in enumerate(home_facility):
+    for n, trainee in enumerate(Controller.traineeList):
+        for item in Controller.facilitysList: 
             for p in all_Pflichteinsaetze:
                 #Einteilung der Azubis in Stammeinrichtung
-                if(stamm[1] == item.facilityID):
-                    model.Add(sum(pfl[(n, g, item.facilityID, p)] for g in startsIA[p] ) >= (int(sollstd_stamm[p] + puffer)))
-                    model.Add(sum(pfl[(n, g, item.facilityID, p)] for g in startsIA[p] ) <= (int(sollstd_stamm[p] + puffer*2)))
+                if(trainee.homeFacility.facilityID == item.facilityID):
+                    model.Add(sum(pfl[(n, g, item.facilityID, p)] for g in startsIA[p] ) == sollstd_stamm[p])
+                    #model.Add(sum(pfl[(n, g, item.facilityID, p)] for g in startsIA[p] ) <= (int(sollstd_stamm[p] + 1)))
                     #print("Stammeinrichtung: ", n, stamm[1], p )
                     
     # #(2)In a shift s / in the care area v, all nurses n have to be over the period d   
     #Employee should work the supply area from the home_facility in their home facility
     #for s, lists in enumerate(Controller.sorted_facilityList):
-    for item in Controller.facilitysList:
-        for n, stamm in enumerate(home_facility):
-            #Einteilung der Azubis in Stammeinrichtung
-            if(stamm[1] == item.facilityID):
+    # for item in Controller.facilitysList:
+    #     for n, stamm in enumerate(home_facility):
+    #         #Einteilung der Azubis in Stammeinrichtung
+    #         if(stamm[1] == item.facilityID):
                 
-                model.Add(sum(shifts[(n, g, item.facilityID, item.number_supply_area)] for g in starts[item.number_supply_area] ) >= (int(sollstd[item.number_supply_area]/2+puffer))).OnlyEnforceIf(home_facility[(stamm[0],stamm[1])])
-                model.Add(sum(shifts[(n, g, item.facilityID, item.number_supply_area)] for g in ends[item.number_supply_area] ) >= (int(sollstd[item.number_supply_area]/2+puffer))).OnlyEnforceIf(home_facility[(stamm[0],stamm[1])])
-            else:
-            #(3) Azubis sollen nur in eine Einrichtung mit einem Versorgungsbereich geplant werden, damit diese nicht ständig neue Arbeitskollegen bekommen.
-                for s, lists in enumerate(Controller.sorted_facilityList):
-                    model.Add(sum(shifts[(n, g, item.facilityID, item.number_supply_area)] for item in lists for g in starts[s] )  >= (int(sollstd[s]/2+puffer))) #noch nicht ausprobiert####.OnlyEnforceIf(home_facility[(stamm[0],stamm[1])])
-                    model.Add(sum(shifts[(n, g, item.facilityID, item.number_supply_area)] for item in lists for g in ends[s] )  >= (int(sollstd[s]/2+puffer)))
+    #             model.Add(sum(shifts[(n, g, item.facilityID, item.number_supply_area)] for g in starts[item.number_supply_area] ) >= (int(sollstd[item.number_supply_area]/2+puffer))).OnlyEnforceIf(home_facility[(stamm[0],stamm[1])])
+    #             model.Add(sum(shifts[(n, g, item.facilityID, item.number_supply_area)] for g in ends[item.number_supply_area] ) >= (int(sollstd[item.number_supply_area]/2+puffer))).OnlyEnforceIf(home_facility[(stamm[0],stamm[1])])
+    #         else:
+    #         #(3) Azubis sollen nur in eine Einrichtung mit einem Versorgungsbereich geplant werden, damit diese nicht ständig neue Arbeitskollegen bekommen.
+    #             for s, lists in enumerate(Controller.sorted_facilityList):
+    #                 model.Add(sum(shifts[(n, g, item.facilityID, item.number_supply_area)] for item in lists for g in starts[s] )  >= (int(sollstd[s]/2+puffer))) #noch nicht ausprobiert####.OnlyEnforceIf(home_facility[(stamm[0],stamm[1])])
+    #                 model.Add(sum(shifts[(n, g, item.facilityID, item.number_supply_area)] for item in lists for g in ends[s] )  >= (int(sollstd[s]/2+puffer)))
+    for n, trainee in enumerate(Controller.traineeList):
+        for s, lists in enumerate(Controller.sorted_facilityList):
+            for itemo in lists:
+            # for n, stamm in enumerate(home_facility):
+                #Einteilung der Azubis in Stammeinrichtung
+                if(trainee.homeFacility.facilityID == itemo.facilityID):
+                    if(itemo.facility_supply_area == FE.PSYC.value):
+                        model.Add(sum(shifts[(n, g, itemo.facilityID, itemo.number_supply_area)] for g in ends[itemo.number_supply_area] ) >=itemo.targetHours)#.OnlyEnforceIf(home_facility[(n,itemo.facilityID)])
+                    else:
+                        model.Add(sum(shifts[(n, g, itemo.facilityID, itemo.number_supply_area)] for g in starts[itemo.number_supply_area] ) >=int(itemo.targetHours/2)) # (int(sollstd[item.number_supply_area]/2+puffer)))#.OnlyEnforceIf(home_facility[(stamm[0],stamm[1])])
+                        model.Add(sum(shifts[(n, g, itemo.facilityID, itemo.number_supply_area)] for g in ends[itemo.number_supply_area] ) >=int(itemo.targetHours/2))# (int(sollstd[item.number_supply_area]/2+puffer)))#.OnlyEnforceIf(home_facility[(stamm[0],stamm[1])])
+                else:
+                #(3) Azubis sollen nur in eine Einrichtung mit einem Versorgungsbereich geplant werden, damit diese nicht ständig neue Arbeitskollegen bekommen.
+                
+                    if(itemo.facility_supply_area == FE.PSYC.value):
+                        model.Add(sum(shifts[(n, g, item.facilityID, item.number_supply_area)] for item in lists for g in ends[itemo.number_supply_area]  ) >=itemo.targetHours)#.OnlyEnforceIf(shifts[(n, d, itemo.facilityID, itemo.number_supply_area)])
+                        #model.Add(sum(shifts[(n, g, item.facilityID, item.number_supply_area)] for item in lists for g in ends[itemo.number_supply_area]  ) <=itemo.targetHours+1)#
+                    else:
+                        model.Add(sum(shifts[(n, g, item.facilityID, item.number_supply_area)] for item in lists for g in starts[itemo.number_supply_area] )  >= (int(itemo.targetHours/2)))#.OnlyEnforceIf(shifts[(n, d, itemo.facilityID, itemo.number_supply_area)])
+                        #model.Add(sum(shifts[(n, g, item.facilityID, item.number_supply_area)] for item in lists for g in ends[itemo.number_supply_area] )  >= (int(itemo.targetHours/2+puffer)))
+
 
     # (4) A supply area v / shift s has a maximum capacity
     for d in weeks_for_work:
         for item in Controller.facilitysList:
-            model.Add(sum(shifts[(n, d, item.facilityID, item.number_supply_area)] for n in all_employees) <= item.maxAvailableTrainingPositions)
+            #for p in all_Pflichteinsaetze:
+                #model.Add((sum(t for t in test) + sum(g for g in rest))==1)
+            model.Add((sum(shifts[(n, d, item.facilityID, item.number_supply_area)] for n in all_employees) + sum(pfl[(n, d, item.facilityID, p)] for n in all_employees for p in all_Pflichteinsaetze)) <= item.maxAvailableTrainingPositions)
+            print((sum(shifts[(n, d, item.facilityID, item.number_supply_area)] for n in all_employees) + sum(pfl[(n, d, item.facilityID, p)] for n in all_employees for p in all_Pflichteinsaetze)) <= item.maxAvailableTrainingPositions)
+    # for d in weeks_for_work:
+    #         for item in Controller.facilitysList:
+    #             for p in all_Pflichteinsaetze:
+    #                 model.Add(sum(pfl[(n, d, item.facilityID, p)] for n in all_employees) <= item.maxAvailableTrainingPositions)
 
 # #(5) An employee a should be assigned to a supply area v for at least 2 weeks w at a time
     #(d_(a,v,w) )+(d_(a,v,w+1) )≥ 2 ∀a ∈A,∀v ∈V,∀w ∈W
