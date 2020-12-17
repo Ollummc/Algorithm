@@ -10,7 +10,7 @@ def CreateUser():
     for i in range (3):
         Trainee1 = Trainee("Azubi" + str(i), "Vorname", "Einrichtung2")
         Controller.traineeList.append(Trainee1)
-    for i in range (2):
+    for i in range (3):
         Trainee1 = Trainee("Azubi" + str(i), "Vorname", "Einrichtung3")
         Controller.traineeList.append(Trainee1)
     for i in range (2):
@@ -44,6 +44,7 @@ def CreateUser():
         for e in Controller.facilitysList:
             if(trainee.homeFacilityName == e.facilityName and trainee.homeFacility is object):
                 trainee.homeFacility = e
+                
                 print (trainee.name, trainee.homeFacility.facility_supply_area)
 
 # FacilityFactory.CreateFacilities()

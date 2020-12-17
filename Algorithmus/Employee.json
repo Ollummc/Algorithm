@@ -1,0 +1,34 @@
+{
+    "Trainee":[
+        {
+            "TraineeID": "3",
+            "StartOfTraining": "",
+            "EndOfTraining": "",
+            "HomeFacility": "",
+            "School": "",
+            "PersonelData": {
+                "Name": "",
+                "FirstName": "",
+                "Age": "",
+                "dateOfBirth": "",
+                "HomeAdress": "",
+                "Email": "",
+                "PhoneNumber": ""
+            },
+            "HoursWorkedSupplyArea": {
+                "AC": " noooooooo",
+                "LTC": "",
+                "AS": "Object",
+                "PC": "Object",
+                "PSYC": "Object"
+            },
+            "HoursWorkedMandatoryArea": {
+                "ORI": "",
+                "SPEC": "",
+                "ELE1": "",
+                "ELE2": ""
+            }
+        }
+    ]
+    
+}

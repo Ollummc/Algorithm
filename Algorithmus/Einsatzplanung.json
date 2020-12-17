@@ -1,0 +1,36 @@
+{
+    "Date": [
+        {
+            "TraineeID": "3",
+            "HomeFacility": "",
+            "Name": "c",
+            "HoursToWorkSupplyArea": {
+                "AC": " noooooooo",
+                "LTC": "",
+                "AS": "Object",
+                "PC": "Object",
+                "PSYC": "Object"
+            },
+            "HoursToWorkMandatoryArea": {
+                "ORI": "",
+                "SPEC": "",
+                "ELE1": "",
+                "ELE2": ""
+            },
+            "AssignedFacilities": {
+                "AC": " noooooooo",
+                "LTC": "",
+                "AS": "Object",
+                "PC": "Object",
+                "PSYC": "Object"
+            },
+            "Workdays": [
+                {
+                    "FacilityName": "",
+                    "FacilitySupplyArea": "",
+                    "Day": "3"
+                }
+            ]
+        }
+    ]
+}

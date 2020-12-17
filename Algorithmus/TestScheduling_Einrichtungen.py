@@ -1,11 +1,14 @@
 from ortools.sat.python import cp_model
-import Controller
+import Controller, TestingJSON
 import FacilityFactory, UserFactory
 import numpy as np 
 from Facilities.BasicFacility import BasicFacility 
 from random import randint
 from FacilityEnum import FacilityEnum as FE, AreaHours as AH, InternalAssignments as IA
 import itertools
+from prettytable import PrettyTable
+import pandas as pd
+
 class NursesPartialSolutionPrinter(cp_model.CpSolverSolutionCallback):
     """Print intermediate solutions."""
    
@@ -37,7 +40,7 @@ class NursesPartialSolutionPrinter(cp_model.CpSolverSolutionCallback):
                     is_working = False
                     #for s in range(self._num_areas):
                     for s in self._facility_supply_area_dict:
-                        if self.Value(self._shifts[(n[0], d, s[1], s[0])]):# or self.Value(self._pflicht[(n[0], d, s[1], s[0])]):
+                        if self.Value(self._shifts[(n[0], d, s[1], s[0])]):
                                 is_working = True
                                 print('  Employee %i works in Facility %i with supply area %i. His HomeFacility is %i ' % (n[0], s[1], s[0], n[1]))
                         for p in range(4):
@@ -65,8 +68,50 @@ class NursesPartialSolutionPrinter(cp_model.CpSolverSolutionCallback):
                     print(' works in Facility %i with the supply area %i a total of %i weeks (%i in Supply, %i in Mandatory)' % (e.facilityID, e.number_supply_area, counter + counterpflicht, counter,counterpflicht))
             for element in testooarr:
                 print(testooarr)
+            #Prints Table with all Employess and the Ressource Planning for all Days. 
+            #This means that the employee knows which day he is working in which facility
+            print()
+           
+            header = '               '
+            for w in (self._num_weeks_for_work):
+                header += "{:<3}".format(str(w))
+            print ("{}".format(header))
+            print()
+            for n, trainee in enumerate(Controller.traineeList):
+                schedule = ''
+                for d in (self._num_weeks_for_work):
+                    counter = 0
+                    for e in Controller.facilitysList:
+                        if self.Value(self._shifts[(n, d,e.facilityID, e.number_supply_area)]):
+                            schedule += "{:<3}".format(str(e.facilityID))
+                        for p in range(4):
+                            if(self.Value(self._pflicht[(n, d,e.facilityID, p)])):
+                                schedule += "{:<3}".format("P")
+                print ('Employee {:<4}: {}'.format(trainee.TraineeID, schedule))
+            
+            print()
+            header = '               '
+            for w in (self._num_weeks_for_work):
+                header += "{:<3}".format(str(w))
+            print ("{}".format(header))
+            print()
+            for e in Controller.facilitysList:
+                print("Einrichtung ", e.facilityID, e.facility_supply_area)
+                
+                for d in (self._num_weeks_for_work):
+                    counter = 0
+                    for n, trainee in enumerate(Controller.traineeList):
+                        schedule = ''
+                        if self.Value(self._shifts[(n, d,e.facilityID, e.number_supply_area)]):
+                            schedule += "{:<3}".format("V")
+                        for p in range(4):
+                            
+                            if(self.Value(self._pflicht[(n, d,e.facilityID, p)])):
+                                schedule += "{:<3}".format("P")
+                        print ('Employee {:<4}: {}'.format(trainee.TraineeID, schedule))
         else:
             self.StopSearch()
+
     def solution_count(self):
         return self._solution_count
 
@@ -184,8 +229,8 @@ def main():
 
 
     for n, trainee in enumerate(Controller.traineeList):
-        for d in weeks_for_work:
-            model.Add(sum(intermediateVar[(n,b)] for b in number_cases) ==1 )
+        #for d in weeks_for_work:
+        model.Add(sum(intermediateVar[(n,b)] for b in number_cases) ==1 )
 
     mega = []
     for n, trainee in enumerate(Controller.traineeList):
@@ -210,12 +255,12 @@ def main():
     puffer =0
     for n, trainee in enumerate(Controller.traineeList):
         for item in Controller.facilitysList: 
-            for p in all_mandatory_area:
                 #Einteilung der Azubis in Stammeinrichtung
-                if(trainee.homeFacility.facilityID == item.facilityID):
-                    model.Add(sum(pfl[(n, g, item.facilityID, p)] for g in startsIA[p] ) >= 1)# sollstd_stamm[p])
-                    model.Add(sum(pfl[(n, g, item.facilityID, p)] for g in startsIA[p] ) <= 2)# sollstd_stamm[p])
-                    #print((sum(pfl[(n, g, item.facilityID, p)] for g in startsIA[p] ) == 1))
+            if(trainee.homeFacility.facilityID == item.facilityID):
+                for p in all_mandatory_area:
+                    model.Add(sum(pfl[(n, g, item.facilityID, p)] for g in startsIA[p] ) == 2)# sollstd_stamm[p])
+                    #model.Add(sum(pfl[(n, g, item.facilityID, p)] for g in startsIA[p] ) <= 2)# sollstd_stamm[p])
+                #print((sum(pfl[(n, g, item.facilityID, p)] for g in startsIA[p] ) == 1))
 
     # #(2)In a shift s / in the care area v, all nurses n have to be over the period d   
     #Employee should work the supply area from the home_facility in their home facility
@@ -304,4 +349,5 @@ def main():
 if __name__ == '__main__':
     FacilityFactory.CreateFacilities()
     UserFactory.CreateUser()
+
     main()
