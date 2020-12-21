@@ -1,0 +1,131 @@
+@startuml
+' Split into 4 pages
+page 2x2
+skinparam pageMargin 5
+skinparam pageExternalColor gray
+skinparam pageBorderColor black
+package "net.User"
+{
+    Trainee <|-- User
+    PracticalGuide <|-- User
+
+}
+
+package "net.Factories"
+{
+    Trainee -> BasicFacility
+    EmployeeFactory --> Controller
+    FacilityFactory --> Controller
+
+}
+
+package "net.Algorithmus"{
+    Controller-- Algorithm
+    Controller -- FacilityEnum
+    Algorithm --FacilityEnum
+    Algorithm -- AreaHours
+    Algorithm -- InternalAssignments
+    Algorithm -> SolutionPrinter
+}
+class Trainee
+{
+    TraineeID : string
+    StartOfTraining : date
+    EndOfTraining : date
+    dividedFacilitys :list[string] 
+    void init( p_name, p_firstname, p_homefacilityName)   
+}
+class User{
+    name : string
+    firstName : string
+    id : int
+    age : int
+    dateOfBirth : date
+    homeAdress : string
+    homeFacilityName : string 
+    homeFacility : Facility
+    email :string
+    phoneNumer : string
+    
+    - void init(p_name, p_firstname, p_homefacilityName)
+}
+class PracticalGuide{
+    - void init( p_name, p_firstname, p_homefacilityName)   
+}   
+class EmployeeFactory{
+    void CreateEmployees()
+    void AddHomeFacility()
+}
+class Controller{
+facilitysList :list
+AmbulantCareFacilityList : list
+LongTermCareList : list
+InpatientAcuteCareFacilityList : list
+PediatricsFacilityList : list
+PsychiatricCareFacilityList : list
+sorted_facilityList : list
+num_weeks :int 
+half_num_of_days : int
+traineeList : list
+}
+
+class Algorithm{
+    sollstd_stamm : dict
+    model :CpModel
+    schoolweeks :dict
+    void GetPossibleWorkdays_SupplyArea()
+    void GetPossibleWorkdays_MandatoryArea()
+    void AddTraineeID_ToInstance()
+    void AddFacilityID_ToInstance()
+    void CreateDecisionVariable_SupplyArea()
+    void CreateDecisionVariable_MandatoryArea()
+    void CreateIntermediateVariable()
+    void AddIntermediateVariable_Constraint()
+    void AddMaxJobOpportunitiesForEveryDay_Constraint()
+    void AddMaxCapacity_Constraint()
+    void AddMinimumOfTwoDaysWork_Constraint()
+    void AddWorkingHours_SupplyArea_Constraint()
+    void AddWorkingHours_MandatoryArea_Constraint()
+
+
+
+
+}
+class SolutionPrinter{
+    #shifts : dict
+    #pflicht : dict
+    #num_weeks_for_work : num_weeks_for_work
+    void OutputAllEmployees()
+    void OutputScheduledHours()
+    void OutputCoordination_View_asTable()
+    void OutputFacility_View_asTable()
+    void OutputEmployee_View_asTabel()
+    void DivideEmployeesToFacilities()
+    void Build_header()
+    void getHeader()
+}
+class FacilityFactory{
+    void CreateFacilities()
+    void AddAllFacilitiesToOneList()
+}
+
+
+
+Enum AreaHours {
+    AC
+    LTC 
+    AS
+    PC
+    PSYC
+}
+
+Enum InternalAssignments 
+{
+    ORI 
+    ELE1 
+    ELE2
+    SPEC
+}
+       
+
+@enduml

@@ -1,0 +1,50 @@
+@startuml
+package "net.Kinds_of_Facilities"
+{
+    InpatienAcutCare <|-- BasicFacility
+    AmbuCare <|-- BasicFacility
+    InpatientLongTermCare <|-- BasicFacility
+    Pediatrics <|-- BasicFacility
+    PsychiatricCare <|-- BasicFacility
+}
+class AmbuCare{
+   
+}
+class InpatienAcutCare{
+    
+
+}
+class InpatientLongTermCare{
+}
+class BasicFacility{
+
+    #facilityName : string
+    #facility_supply_area : FacilityEnum
+    #currentlyOccupiedTrainingPositions : int
+    #maxAvailableTrainingPositions : int
+    #targetHours : int
+    #hours_a_day : int
+    #practicalGuides : list
+    #regularTrainees : int
+    #externTrainees : int 
+    #facilityID : int
+    #number_supply_area : int
+    -void init(p_facilityName, p_maxAvailableTrainingPositions)
+}
+
+class Pediatrics{
+}
+class PsychiatricCare{
+
+   
+
+}
+
+Enum FacilityEnum{
+    AC
+    LTC 
+    AS
+    PC 
+    PSYC
+    }
+@enduml

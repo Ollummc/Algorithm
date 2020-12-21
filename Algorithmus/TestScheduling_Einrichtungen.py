@@ -25,90 +25,136 @@ class NursesPartialSolutionPrinter(cp_model.CpSolverSolutionCallback):
         self._solution_count = 0
         self._facility_supply_area_dict = p_facility_supply_area_dict
         self._homeFacility = p_homeFacility
-      
+        self.header = ""
+    def OutputAllEmployees (self):
+        print('Solution %i' % self._solution_count)
+        for d in self._num_weeks_for_work:
+            print('Woche %i' % d)
+            for n in self._homeFacility:
+                not_working_counter= 0
+            #for n in range(self._num_employees):
+                is_working = False
+                #for s in range(self._num_areas):
+                for s in self._facility_supply_area_dict:
+                    if self.Value(self._shifts[(n[0], d, s[1], s[0])]):
+                            is_working = True
+                            print('  Employee %i works in Facility %i with supply area %i. His HomeFacility is %i ' % (n[0], s[1], s[0], n[1]))
+                    for p in range(4):
+                        if self.Value(self._pflicht[(n[0], d, s[1], p)]):
+                            is_working = True
+                            print('  Employee %i works in Facility %i in the Plfichteinsatz %i am Tag %i.His HomeFacility is %i' % (n[0], s[1],p,d,n[1]))  
+                if not is_working:
+                    print('  Employee {} does not work'.format(n))
+                    not_working_counter +=1
+        self._solution_count += 1
         
+    def OutputScheduleHours(self):
+        print()
+        for n in range (self._num_employees):
+            print('Employee %i' %(n))
+            counter = 0
+            for e in Controller.facilitysList:
+                counter = 0
+                counterpflicht = 0
+                for d in (self._num_weeks_for_work):
+                    if (self.Value(self._shifts[(n, d,e.facilityID, e.number_supply_area)])):
+                            counter +=1
+                    for p in range(4):
+                        if(self.Value(self._pflicht[(n, d,e.facilityID, p)])):
+                            counterpflicht +=1
+                print(' works in Facility %i with the supply area %i a total of %i weeks (%i in Supply, %i in Mandatory)' % (e.facilityID, e.number_supply_area, counter + counterpflicht, counter,counterpflicht))
+    
+    def OutputCoordination_View_asTable(self):
+         #This means that the employee knows which day he is working in which facility
+        self.getHeader()
+        for n, trainee in enumerate(Controller.traineeList):
+            schedule = ''
+            for d in (self._num_weeks_for_work):
+                counter = 0
+                for e in Controller.facilitysList:
+                    if self.Value(self._shifts[(n, d,e.facilityID, e.number_supply_area)]):
+                        schedule += "{:<3}".format(str(e.facilityID))
+                    for p in range(4):
+                        if(self.Value(self._pflicht[(n, d,e.facilityID, p)])):
+                            schedule += "{:<3}".format("P")
+            print ('Employee {:<4}: {}'.format(trainee.TraineeID, schedule))
+    
+    def OutputFacility_View_asTable(self):
+        for e in Controller.facilitysList:
+            print("Einrichtung ", e.facilityID, e.facility_supply_area)
+            self.getHeader()
+            for n, trainee in enumerate(Controller.traineeList):
+                schedule = ''
+                for d in (self._num_weeks_for_work):
+
+                    if self.Value(self._shifts[(n, d,e.facilityID, e.number_supply_area)]) and trainee.dividedFacilitys[e.facility_supply_area] == e.facilityName:
+                        schedule += "{:<3}".format("W")
+                    for p in range(4):
+                        
+                        if(self.Value(self._pflicht[(n, d,e.facilityID, p)])):
+                            schedule += "{:<3}".format("P")
+                            break
+                    if(not(self.Value(self._shifts[(n, d,e.facilityID, e.number_supply_area)])) and not(self.Value(self._pflicht[(n, d,e.facilityID, p)]) )):
+                        schedule += "{:<3}".format("0")
+                if(trainee.dividedFacilitys[e.facility_supply_area] == e.facilityName):
+                    print ('Employee {:<4}: {}'.format(trainee.TraineeID, schedule))
+            print()
+    def OutputEmployee_View_asTabel(self):
+        self.getHeader()
+        for n, trainee in enumerate(Controller.traineeList):
+            print("Employee ", trainee.TraineeID)# trainee.homeFacilityName)  
+            for e in Controller.facilitysList:
+                schedule = ''                
+                for d in (self._num_weeks_for_work):
+                    if self.Value(self._shifts[(n, d,e.facilityID, e.number_supply_area)]) and trainee.dividedFacilitys[e.facility_supply_area] == e.facilityName:
+                        schedule += "{:<3}".format("W")
+
+                    for p in range(4):
+                        
+                        if(self.Value(self._pflicht[(n, d,e.facilityID, p)])):
+                            schedule += "{:<3}".format("P")
+                            break
+                    if(not(self.Value(self._shifts[(n, d,e.facilityID, e.number_supply_area)])) and not(self.Value(self._pflicht[(n, d,e.facilityID, p)]) )):
+                        schedule += "{:<3}".format("0")
+                if(trainee.dividedFacilitys[e.facility_supply_area] == e.facilityName):
+                    print ('Facility {:<4}: {}'.format(e.facilityID, schedule))
+
+    def DivideEmployeesToFacilities(self):
+        for n, trainee in enumerate(Controller.traineeList):
+            for e in Controller.facilitysList:
+                for d in (self._num_weeks_for_work):   
+                    if self.Value(self._shifts[(n, d,e.facilityID, e.number_supply_area)]):
+                        trainee.dividedFacilitys[e.facility_supply_area] = e.facilityName
+                        break
+    def Build_header(self):
+        self.header = '               '
+        for w in (self._num_weeks_for_work):
+            self.header += "{:<3}".format(str(w))
+        
+    def getHeader(self):
+        print ("{}".format(self.header))
+
     def on_solution_callback(self):
         testooarr = []
         not_working_counter= 0
         if self._solution_count <= self._solutions:
-            print('Solution %i' % self._solution_count)
-            for d in self._num_weeks_for_work:
-                print('Woche %i' % d)
-                for n in self._homeFacility:
-                    not_working_counter= 0
-                #for n in range(self._num_employees):
-                    is_working = False
-                    #for s in range(self._num_areas):
-                    for s in self._facility_supply_area_dict:
-                        if self.Value(self._shifts[(n[0], d, s[1], s[0])]):
-                                is_working = True
-                                print('  Employee %i works in Facility %i with supply area %i. His HomeFacility is %i ' % (n[0], s[1], s[0], n[1]))
-                        for p in range(4):
-                            if self.Value(self._pflicht[(n[0], d, s[1], p)]):
-                                is_working = True
-                                print('  Employee %i works in Facility %i in the Plfichteinsatz %i am Tag %i.His HomeFacility is %i' % (n[0], s[1],p,d,n[1]))  
-                    if not is_working:
-                        print('  Employee {} does not work'.format(n))
-                        not_working_counter +=1
-            self._solution_count += 1
-        
-            print()
-            for n in range (self._num_employees):
-                print('Employee %i' %(n))
-                counter = 0
-                for e in Controller.facilitysList:
-                    counter = 0
-                    counterpflicht = 0
-                    for d in (self._num_weeks_for_work):
-                        if (self.Value(self._shifts[(n, d,e.facilityID, e.number_supply_area)])):
-                                counter +=1
-                        for p in range(4):
-                            if(self.Value(self._pflicht[(n, d,e.facilityID, p)])):
-                                counterpflicht +=1
-                    print(' works in Facility %i with the supply area %i a total of %i weeks (%i in Supply, %i in Mandatory)' % (e.facilityID, e.number_supply_area, counter + counterpflicht, counter,counterpflicht))
-            for element in testooarr:
-                print(testooarr)
+            self.Build_header()
+            self.OutputAllEmployees()
+            self.OutputScheduleHours()
+
             #Prints Table with all Employess and the Ressource Planning for all Days. 
-            #This means that the employee knows which day he is working in which facility
-            print()
+            print("Coordination_View_asTable")
+            self.OutputCoordination_View_asTable()
            
-            header = '               '
-            for w in (self._num_weeks_for_work):
-                header += "{:<3}".format(str(w))
-            print ("{}".format(header))
-            print()
-            for n, trainee in enumerate(Controller.traineeList):
-                schedule = ''
-                for d in (self._num_weeks_for_work):
-                    counter = 0
-                    for e in Controller.facilitysList:
-                        if self.Value(self._shifts[(n, d,e.facilityID, e.number_supply_area)]):
-                            schedule += "{:<3}".format(str(e.facilityID))
-                        for p in range(4):
-                            if(self.Value(self._pflicht[(n, d,e.facilityID, p)])):
-                                schedule += "{:<3}".format("P")
-                print ('Employee {:<4}: {}'.format(trainee.TraineeID, schedule))
-            
-            print()
-            header = '               '
-            for w in (self._num_weeks_for_work):
-                header += "{:<3}".format(str(w))
-            print ("{}".format(header))
-            print()
-            for e in Controller.facilitysList:
-                print("Einrichtung ", e.facilityID, e.facility_supply_area)
-                
-                for d in (self._num_weeks_for_work):
-                    counter = 0
-                    for n, trainee in enumerate(Controller.traineeList):
-                        schedule = ''
-                        if self.Value(self._shifts[(n, d,e.facilityID, e.number_supply_area)]):
-                            schedule += "{:<3}".format("V")
-                        for p in range(4):
-                            
-                            if(self.Value(self._pflicht[(n, d,e.facilityID, p)])):
-                                schedule += "{:<3}".format("P")
-                        print ('Employee {:<4}: {}'.format(trainee.TraineeID, schedule))
+            self.DivideEmployeesToFacilities()
+
+            print("Facility_View_asTable")
+            self.OutputFacility_View_asTable()
+
+            print("Employee_View_asTabel")
+            self.OutputEmployee_View_asTabel()
+
+        
         else:
             self.StopSearch()
 
@@ -246,11 +292,7 @@ def main():
                             job_opportunities.append(pfl[(n,d,e.facilityID, p)])
                 mega.append(job_opportunities)
                 model.Add(sum(job_opportunities)==1).OnlyEnforceIf(intermediateVar[n,b])
-                #print(sum(job_opportunities)==1)
 
-    # for t in mega:
-    #     print("lelelele")
-    #     print (t)
 # # #(2)Verteilt die definierten Soll-Stunden der Azbis n an Tag d nur, wenn Die aktuelle Einrichtung identisch mti der im Einrichtungsobjekt ist
     puffer =0
     for n, trainee in enumerate(Controller.traineeList):
@@ -258,9 +300,8 @@ def main():
                 #Einteilung der Azubis in Stammeinrichtung
             if(trainee.homeFacility.facilityID == item.facilityID):
                 for p in all_mandatory_area:
-                    model.Add(sum(pfl[(n, g, item.facilityID, p)] for g in startsIA[p] ) == 2)# sollstd_stamm[p])
-                    #model.Add(sum(pfl[(n, g, item.facilityID, p)] for g in startsIA[p] ) <= 2)# sollstd_stamm[p])
-                #print((sum(pfl[(n, g, item.facilityID, p)] for g in startsIA[p] ) == 1))
+                    model.Add(sum(pfl[(n, g, item.facilityID, p)] for g in startsIA[p] ) == sollstd_stamm[p])
+    
 
     # #(2)In a shift s / in the care area v, all nurses n have to be over the period d   
     #Employee should work the supply area from the home_facility in their home facility
@@ -271,16 +312,15 @@ def main():
                 #Einteilung der Azubis in Stammeinrichtung
                 if(trainee.homeFacility.facilityID == itemo.facilityID):
                     if(itemo.facility_supply_area == FE.PSYC.value):
-                        model.Add(sum(shifts[(n, g, itemo.facilityID, itemo.number_supply_area)] for g in ends[itemo.number_supply_area] ) >=itemo.targetHours)#.OnlyEnforceIf(home_facility[(n,itemo.facilityID)])
+                        model.Add(sum(shifts[(n, g, itemo.facilityID, itemo.number_supply_area)] for g in ends[itemo.number_supply_area] ) >=itemo.targetHours)
                     else:
-                        model.Add(sum(shifts[(n, g, itemo.facilityID, itemo.number_supply_area)] for g in starts[itemo.number_supply_area] ) >=int(itemo.targetHours/2)) # (int(sollstd[item.number_supply_area]/2+puffer)))#.OnlyEnforceIf(home_facility[(stamm[0],stamm[1])])
-                        model.Add(sum(shifts[(n, g, itemo.facilityID, itemo.number_supply_area)] for g in ends[itemo.number_supply_area] ) >=int(itemo.targetHours/2))# (int(sollstd[item.number_supply_area]/2+puffer)))#.OnlyEnforceIf(home_facility[(stamm[0],stamm[1])])
+                        model.Add(sum(shifts[(n, g, itemo.facilityID, itemo.number_supply_area)] for g in starts[itemo.number_supply_area] ) >=int(itemo.targetHours/2))
+                        model.Add(sum(shifts[(n, g, itemo.facilityID, itemo.number_supply_area)] for g in ends[itemo.number_supply_area] ) >=int(itemo.targetHours/2))
                 else:
                 #(3) Azubis sollen nur in eine Einrichtung mit einem Versorgungsbereich geplant werden, damit diese nicht ständig neue Arbeitskollegen bekommen.
             
                     if(itemo.facility_supply_area == FE.PSYC.value):
                         model.Add(sum(shifts[(n, g, item.facilityID, item.number_supply_area)] for item in lists for g in ends[itemo.number_supply_area]  ) >=itemo.targetHours)#.OnlyEnforceIf(shifts[(n, d, itemo.facilityID, itemo.number_supply_area)])
-                        #model.Add(sum(shifts[(n, g, item.facilityID, item.number_supply_area)] for item in lists for g in ends[itemo.number_supply_area]  ) <=itemo.targetHours+1)#
                     else:
                         model.Add(sum(shifts[(n, g, item.facilityID, item.number_supply_area)] for item in lists for g in starts[itemo.number_supply_area] )  >= (int(itemo.targetHours/2)))#.OnlyEnforceIf(shifts[(n, d, itemo.facilityID, itemo.number_supply_area)])
                         model.Add(sum(shifts[(n, g, item.facilityID, item.number_supply_area)] for item in lists for g in ends[itemo.number_supply_area] )  >= (int(itemo.targetHours/2+puffer)))
@@ -289,8 +329,6 @@ def main():
     # (4) A supply area v / shift s has a maximum capacity
     for d in weeks_for_work:
         for item in Controller.facilitysList:
-            #for p in all_Pflichteinsaetze:
-                #model.Add((sum(t for t in test) + sum(g for g in rest))==1)
             model.Add((sum(shifts[(n, d, item.facilityID, item.number_supply_area)] for n in all_employees)+ sum(pfl[(n, d, item.facilityID, p)] for n in all_employees for p in all_mandatory_area)) <= item.maxAvailableTrainingPositions)
 
 # #(5) An employee a should be assigned to a supply area v for at least 2 weeks w at a time

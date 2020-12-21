@@ -1,0 +1,54 @@
+@startuml
+actor Koordinator
+database Frontend
+database Backend
+control Datenverarbeitung
+
+
+
+Koordinator -> Frontend: CreateNewFacility()
+activate Frontend
+activate Koordinator
+Frontend -> Backend: CreateFacility()
+activate Backend
+Backend -> Backend : SaveFacility_in_Facilities.json()
+deactivate Backend
+Backend -> Frontend: Facility_IsCreated()
+Frontend -> Koordinator: OperationCarriedOut()
+
+Koordinator -> Frontend: CreateNewEmployee()
+Frontend -> Backend: CreateEmployee()
+activate Backend
+Backend -> Backend: SaveEmployee_in_Employee.json
+deactivate Backend
+Backend -> Koordinator: "Employee_IsCreated"
+
+
+Koordinator -> Frontend: GetVisualisationOfSchedules() 
+Frontend -> Datenverarbeitung: Get AllSchedules()
+
+activate Datenverarbeitung
+Datenverarbeitung -> Backend: get Facility.json
+activate Backend
+Datenverarbeitung -> Backend: get Employee.json
+Backend -> Datenverarbeitung: send Facility.json
+Backend -> Datenverarbeitung: send Employee.json
+deactivate Backend
+
+Datenverarbeitung -> Datenverarbeitung: StartCalculating()
+
+Datenverarbeitung -> Backend: SaveSchedules as Schedules.json
+
+activate Backend
+Backend -> Backend: Save new Schedules.json File
+Backend -> Datenverarbeitung:  File Saved()
+deactivate Backend
+Datenverarbeitung -> Frontend: Return Json()
+Frontend -> Koordinator: DisplayTheVisualization() 
+deactivate Datenverarbeitung
+deactivate Koordinator
+
+
+
+
+@enduml
