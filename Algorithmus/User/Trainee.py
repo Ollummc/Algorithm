@@ -20,17 +20,6 @@ class Trainee (User):
         "Pediatrics_Care" : None,#2#120
         "Psychiatric_Care": None #2#120
         }
-        #self.homeFacility = object
-
-        
-
-# divided_facilitys = {
-#         "AC":"1",#6#400
-#         "LTC":"2",#6#400
-#         "AS" : "3",#6#400
-#         "PC" : "4",#2#120
-#         "PSYC": "5" #2#120
-#     }
 # for key,value in divided_facilitys.items():
 #     print(value)
 # print(divided_facilitys["AC"])

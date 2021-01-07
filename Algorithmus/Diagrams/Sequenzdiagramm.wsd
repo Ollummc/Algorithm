@@ -12,17 +12,17 @@ activate Koordinator
 Frontend -> Backend: CreateFacility()
 activate Backend
 Backend -> Backend : SaveFacility_in_Facilities.json()
-deactivate Backend
 Backend -> Frontend: Facility_IsCreated()
+deactivate Backend
 Frontend -> Koordinator: OperationCarriedOut()
 
 Koordinator -> Frontend: CreateNewEmployee()
 Frontend -> Backend: CreateEmployee()
 activate Backend
 Backend -> Backend: SaveEmployee_in_Employee.json
-deactivate Backend
-Backend -> Koordinator: "Employee_IsCreated"
 
+Backend -> Koordinator: "Employee_IsCreated"
+deactivate Backend
 
 Koordinator -> Frontend: GetVisualisationOfSchedules() 
 Frontend -> Datenverarbeitung: Get AllSchedules()
@@ -41,9 +41,8 @@ Datenverarbeitung -> Backend: SaveSchedules as Schedules.json
 
 activate Backend
 Backend -> Backend: Save new Schedules.json File
-Backend -> Datenverarbeitung:  File Saved()
 deactivate Backend
-Datenverarbeitung -> Frontend: Return Json()
+Backend -> Frontend: Return Json()
 Frontend -> Koordinator: DisplayTheVisualization() 
 deactivate Datenverarbeitung
 deactivate Koordinator
